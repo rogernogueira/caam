@@ -1,0 +1,28 @@
+[project]
+name = "primeiro-agente"
+version = "0.1.0"
+description = "primeiro agente inteligente"
+readme = "README.md"
+requires-python = ">=3.13.2"
+dependencies = [
+    "agno>=1.5.6",
+    "notebook>=7.4.3",
+    "ollama>=0.5.1",
+    "openai>=1.83.0",
+    "openpyxl>=3.1.5",
+    "pandas>=2.2.3",
+    "pymupdf>=1.26.0",
+    "python-dotenv>=1.1.0",
+]
+[tool.taskipy.tasks]
+gitadd = "git add ."
+gitcommit = "git commit -m 'update'"
+gitpush = "git push"
+deploy = "ssh root@192.168. 'cd /caminho/do/repositorio && git pull'"
+pushdeploy = "task gitadd && task gitcommit && task gitpush && task deploy"
+psh = "task gitadd && task gitcommit && task gitpush "
+
+[dependency-groups]
+dev = [
+    "taskipy>=1.14.1",
+]

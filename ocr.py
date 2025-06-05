@@ -4,11 +4,11 @@ from pydantic import BaseModel
 from ollama import chat
 import pymupdf
 
-path = "dados/Documento OCR.pdf"
+path = "dados/auxilio.pdf"
 doc = pymupdf.open(path)
-doc[0].get_pixmap( ).save("dados/Documento.png")
+doc[0].get_pixmap(dpi=200).save("dados/auxilio.png")
 
-path_img = Path('dados/Documento.png')
+path_img = Path('dados/auxilio.png')
 
 
 # Verify the file exists
