@@ -11,6 +11,7 @@ from agno.tools.file import FileTools
 from pathlib import Path
 from pydantic import BaseModel, Field
 from text_util import apply_ocr
+import cv2
 
 class DocumentData(BaseModel):
     Nome: str = Field(...,  description="Nome da pessoa extraído do documento.")
@@ -51,7 +52,14 @@ for file in os.listdir(data_dir):
             for i, page in enumerate(doc):
                 # converte a página em imagem
                 file_img = str(file.absolute()).replace('.pdf', f'_{i}.png')
-                page.get_pixmap(dpi=300).save(file_img)
+                page.get_pixmap(dpi=200).save(file_img)
+                # carrega a imagem
+                img = cv2.imread(file_img)
+                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+                denoised = cv2.fastNlMeansDenoising(thresh, h=30)
+                cv2.imwrite(file_img, denoised)
+
                 imgs.append(Image(filepath=Path(file_img), name=f'Pagina {i}', description='Documento OCR'))
             response = agent.run(images=imgs)
             ocr= True
