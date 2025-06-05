@@ -28,7 +28,7 @@ agent = Agent(
     )
 # Print the response in the terminal
 
-doc = pymupdf.open("dados\Documento OCR.pdf")
+doc = pymupdf.open("dados\\auxilio.pdf")
 texto = ""
 
 for page in doc:
