@@ -17,7 +17,7 @@ dependencies = [
 [tool.taskipy.tasks]
 gitadd = "git add ."
 gitcommit = "git commit -m 'update'"
-gitpush = "git push"
+gitpush = "git push origin main"
 deploy = "ssh root@192.168. 'cd /caminho/do/repositorio && git pull'"
 pushdeploy = "task gitadd && task gitcommit && task gitpush && task deploy"
 psh = "task gitadd && task gitcommit && task gitpush "
