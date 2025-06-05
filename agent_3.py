@@ -12,20 +12,21 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 from text_util import apply_ocr
 import cv2
-
+import numpy as np
+model_name = 'hf.co/mradermacher/olmOCR-7B-faithful-i1-GGUF:Q6_K'
 class DocumentData(BaseModel):
     Nome: str = Field(...,  description="Nome da pessoa extraído do documento.")
     Matricula: str = Field(..., description="Matrícula da pessoa extraída do documento.")
     Cargo: str = Field(..., description="Cargo da pessoa extraído do documento.")
 
 agent = Agent(
-        model=Ollama(id='qwen2.5vl'),
+        model=Ollama(id=model_name, options={'temperature': 0, 'nun_ctx':'4096', }),
         instructions=dedent('''Extraia os seguinte dados do documento.
             {'Nome':'none da pessoa', 
             'Matricula':'matricula da pessoa',  
             'Cargo':'cargo da pessoa'}. 
             } 
-                
+        
             '''),     
     response_model = DocumentData,  
     name="AnalistaRH",
@@ -52,14 +53,17 @@ for file in os.listdir(data_dir):
             for i, page in enumerate(doc):
                 # converte a página em imagem
                 file_img = str(file.absolute()).replace('.pdf', f'_{i}.png')
-                page.get_pixmap(dpi=200).save(file_img)
-                # carrega a imagem
-                img = cv2.imread(file_img)
-                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-                denoised = cv2.fastNlMeansDenoising(thresh, h=30)
-                cv2.imwrite(file_img, denoised)
-
+                page.get_pixmap(dpi=300).save(file_img)
+                # # carrega a imagem
+                # img = cv2.imread(file_img)
+                # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                # _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+                # denoised = cv2.fastNlMeansDenoising(thresh, h=30)
+                # kernel = np.array([[0, -1, 0],
+                #        [-1, 5,-1],
+                #        [0, -1, 0]])
+                # sharpened = cv2.filter2D(denoised, -1, kernel)
+                # cv2.imwrite(file_img, sharpened)
                 imgs.append(Image(filepath=Path(file_img), name=f'Pagina {i}', description='Documento OCR'))
             response = agent.run(images=imgs)
             ocr= True
@@ -83,7 +87,8 @@ for file in os.listdir(data_dir):
         data_extract_docs.append(data_doc)
 
 df  = pd.DataFrame(data_extract_docs)
-df.to_excel(f'dados_extraido.xlsx', index=False)
+df.to_excel(f'dados_extraido_olmOCR_6bits.xlsx', index=False)
+
 print(df.head())
 
 
