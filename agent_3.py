@@ -6,23 +6,22 @@ import pandas as pd
 import pymupdf
 import os
 from agno.media import Image
-from agno.tools.shell import ShellTools
-from agno.tools.file import FileTools
 from pathlib import Path
 from pydantic import BaseModel, Field
 from text_util import apply_ocr
-import cv2
-import numpy as np
-model_name = 'hf.co/mradermacher/olmOCR-7B-faithful-i1-GGUF:Q6_K'
+
+
+model_name = 'llama3.2-vision'
+
 class DocumentData(BaseModel):
     Nome: str = Field(...,  description="Nome da pessoa extraído do documento.")
     Matricula: str = Field(..., description="Matrícula da pessoa extraída do documento.")
     Cargo: str = Field(..., description="Cargo da pessoa extraído do documento.")
 
 agent = Agent(
-        model=Ollama(id=model_name, options={'temperature': 0, 'nun_ctx':'4096', }),
+        model=Ollama(id=model_name, options={'temperature': 0, 'nun_ctx':'4096' }),
         instructions=dedent('''Extraia os seguinte dados do documento.
-            {'Nome':'none da pessoa', 
+            {'Nome':'none da pessoa', u
             'Matricula':'matricula da pessoa',  
             'Cargo':'cargo da pessoa'}. 
             } 
@@ -32,7 +31,9 @@ agent = Agent(
     name="AnalistaRH",
     description="Analista de Recursos Humanos que extrai dados de documentos.",
     )
+
 data_dir = Path('dados')
+
 data_extract_docs = []
 for file in os.listdir(data_dir):
     if not file.endswith('.pdf'):
@@ -56,7 +57,7 @@ for file in os.listdir(data_dir):
                 page.get_pixmap(dpi=300).save(file_img)
                 imgs.append(Image(filepath=Path(file_img), name=f'Pagina {i}', description='Documento OCR'))
             response = agent.run(images=imgs)
-            ocr= True
+            ocr = True
             # deleta  as imagens criadas
             for img in imgs:
                 if img.filepath.exists():
@@ -77,7 +78,7 @@ for file in os.listdir(data_dir):
         data_extract_docs.append(data_doc)
 
 df  = pd.DataFrame(data_extract_docs)
-df.to_excel(f'dados_extraido_olmOCR_6bits.xlsx', index=False)
+df.to_excel(f'dados_extraido_llama3.2-vision.xlsx', index=False)
 
 print(df.head())
 
