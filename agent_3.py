@@ -10,9 +10,10 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 from text_util import apply_ocr
 
+dir_name = 'dados' # local onde estão os documentos
+model_name = 'qwen2.5vl:3b' # modelo que será usado para extrair os dados
 
-model_name = 'llama3.2-vision'
-
+data_dir = Path(dir_name)
 class DocumentData(BaseModel):
     Nome: str = Field(...,  description="Nome da pessoa extraído do documento.")
     Matricula: str = Field(..., description="Matrícula da pessoa extraída do documento.")
@@ -25,15 +26,11 @@ agent = Agent(
             'Matricula':'matricula da pessoa',  
             'Cargo':'cargo da pessoa'}. 
             } 
-        
             '''),     
     response_model = DocumentData,  
     name="AnalistaRH",
     description="Analista de Recursos Humanos que extrai dados de documentos.",
     )
-
-data_dir = Path('dados')
-
 data_extract_docs = []
 for file in os.listdir(data_dir):
     if not file.endswith('.pdf'):
@@ -78,9 +75,7 @@ for file in os.listdir(data_dir):
         data_extract_docs.append(data_doc)
 
 df  = pd.DataFrame(data_extract_docs)
-df.to_excel(f'dados_extraido_llama3.2-vision.xlsx', index=False)
-
-print(df.head())
+df.to_excel(f'dados_extraido_qwen2.5vl-3b.xlsx', index=False)
 
 
             
